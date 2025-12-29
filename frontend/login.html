@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RePlate - Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>🍽️ RePlate</h1>
+        <div class="nav-right">
+            <button id="darkModeToggle" class="toggle-btn">🌙</button>
+        </div>
+    </nav>
+    <!-- Floating background elements -->
+    <div class="floating-bg">
+        <div class="floating-element"></div>
+        <div class="floating-element">🍕</div>
+        <div class="floating-element">🥗</div>
+        <div class="floating-element">🍞</div>
+        <div class="floating-element">🥕</div>
+        <div class="floating-element">🥞</div>
+        <div class="floating-element">🍛</div>
+        <div class="floating-element">🍲</div>
+        <div class="floating-element">🥘</div>
+        <div class="floating-element">🍔</div>
+        
+    </div>
+    <div class="container">
+        <h2>Welcome to RePlate</h2>
+        <p>Select your role to get started and help reduce food waste!</p>
+        <form id="roleForm" class="role-selection">
+            <div class="role-card" data-role="donor">
+                <div class="role-icon">🏪</div>
+                <h3>Donor</h3>
+                <p>Share surplus food from your restaurant or event.</p>
+                <input type="radio" name="role" value="donor" required>
+            </div>
+            <div class="role-card" data-role="ngo">
+                <div class="role-icon">🤝</div>
+                <h3>NGO</h3>
+                <p>Collect and distribute food to those in need.</p>
+                <input type="radio" name="role" value="ngo" required>
+            </div>
+            <button type="submit" class="btn proceed-btn">Proceed</button>
+        </form>
+        <div id="loading" class="loading hidden">Processing...</div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
