@@ -5,13 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RePlate - NGO Dashboard</title>
     <link rel="stylesheet" href="style.css">
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  defer
+></script>
+<!-- Leaflet Routing -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"
+/>
+
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+
+
 </head>
 <body>
-    <nav class="navbar">
-        <h1>🍽️ RePlate - NGO</h1>
-        <div class="nav-right">
-            <button id="darkModeToggle" class="toggle-btn">🌙</button>
-        </div>
+   <nav class="navbar">
+  <div class="brand">
+    <div class="logo-wrap">
+      <img src="assets/logo.png" alt="RePlate Logo" />
+    </div>
+    <span class="brand-name">RePlate</span>
+  </div>
+
+  <button id="darkModeToggle" class="toggle-btn">🌙</button>
+</nav>
+
+
     </nav>
     <div class="container">
         <h2>Available Food Posts</h2>

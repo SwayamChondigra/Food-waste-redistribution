@@ -1,186 +1,183 @@
-// Global variables
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = "http://localhost:3000/api";
 
-// Dark mode toggle functionality
-function initDarkMode() {
-    const toggle = document.getElementById('darkModeToggle');
-    if (toggle) {
-        toggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-            toggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
-        });
-    }
+/* =========================
+   UTILS
+========================= */
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) *
+    Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) ** 2;
+
+  return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))).toFixed(2);
 }
 
-// Login page: Handle role selection and redirection with enhancements
-if (window.location.pathname.includes('login.html')) {
-    initDarkMode();
-    const roleForm = document.getElementById('roleForm');
-    const loadingDiv = document.getElementById('loading');
-    const roleCards = document.querySelectorAll('.role-card');
+/* =========================
+   DONOR PAGE
+========================= */
+if (location.pathname.includes("donor.html")) {
+  const form = document.getElementById("foodForm");
+  const locationInput = document.getElementById("location");
+  const getLocationBtn = document.getElementById("getLocationBtn");
+  const alertBox = document.getElementById("alert");
 
-    // Visual selection for role cards
-    roleCards.forEach(card => {
-        card.addEventListener('click', () => {
-            roleCards.forEach(c => c.classList.remove('selected'));
-            card.classList.add('selected');
-            card.querySelector('input[type="radio"]').checked = true;
-        });
-    });
+  let donorLat = null;
+  let donorLng = null;
 
-    roleForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const role = document.querySelector('input[name="role"]:checked').value;
-        loadingDiv.classList.remove('hidden');
-        // Simulate loading for demo feel
-        setTimeout(() => {
-            window.location.href = role === 'donor' ? 'donor.html' : 'ngo.html';
-        }, 1000);
-    });
-}
+  getLocationBtn.addEventListener("click", () => {
+    navigator.geolocation.getCurrentPosition(
+      async pos => {
+        donorLat = pos.coords.latitude;
+        donorLng = pos.coords.longitude;
 
-// Donor page: Handle food posting
-if (window.location.pathname.includes('donor.html')) {
-    initDarkMode();
-    const foodForm = document.getElementById('foodForm');
-    const alertDiv = document.getElementById('alert');
-    const getLocationBtn = document.getElementById('getLocationBtn');
-    const locationInput = document.getElementById('location');
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${donorLat}&lon=${donorLng}`
+        );
+        const data = await res.json();
 
-    getLocationBtn.addEventListener('click', async () => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    try {
-                        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`);
-                        const data = await response.json();
-                        if (data && data.display_name) {
-                            locationInput.value = data.display_name;
-                        } else {
-                            locationInput.value = `${lat}, ${lng}`;
-                        }
-                    } catch (error) {
-                        console.error('Error reverse geocoding:', error);
-                        locationInput.value = `${lat}, ${lng}`;
-                    }
-                },
-                (error) => {
-                    console.error('Error getting location:', error);
-                    alert('Unable to get location. Please enter manually.');
-                }
-            );
-        } else {
-            alert('Geolocation is not supported by this browser.');
-        }
-    });
+        locationInput.value =
+          data.display_name || `${donorLat}, ${donorLng}`;
 
-    foodForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const data = {
-            foodName: document.getElementById('foodName').value,
-            quantity: document.getElementById('quantity').value,
-            location: document.getElementById('location').value,
-            expiry: document.getElementById('expiry').value,
-            phone: document.getElementById('phone').value
-        };
+        getLocationBtn.innerText = "✅ Location Set";
+      },
+      err => {
+        alert("Location permission denied");
+        console.error(err);
+      }
+    );
+  });
 
-        try {
-            const response = await fetch(`${API_BASE}/food`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            if (response.ok) {
-                alertDiv.textContent = 'Food posted successfully!';
-                alertDiv.classList.remove('hidden');
-                foodForm.reset();
-                setTimeout(() => alertDiv.classList.add('hidden'), 3000);
-            } else {
-                const error = await response.text();
-                alertDiv.textContent = error;
-                alertDiv.classList.remove('hidden');
-            }
-        } catch (error) {
-            console.error('Error posting food:', error);
-            alertDiv.textContent = 'Error posting food. Try again.';
-            alertDiv.classList.remove('hidden');
-        }
-    });
-}
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
 
-// NGO page: Fetch and display food posts, handle collection
-if (window.location.pathname.includes('ngo.html')) {
-    initDarkMode();
-    const foodList = document.getElementById('foodList');
-
-    async function fetchFoodPosts() {
-        try {
-            const response = await fetch(`${API_BASE}/food`);
-            const posts = await response.json();
-            displayFoodPosts(posts);
-        } catch (error) {
-            console.error('Error fetching food posts:', error);
-        }
+    if (!donorLat || !donorLng) {
+      alert("Please click Get Location first");
+      return;
     }
 
-    function displayFoodPosts(posts) {
-        foodList.innerHTML = '';
-        if (posts.length === 0) {
-            foodList.innerHTML = '<p>No available food posts.</p>';
-            return;
-        }
-        posts.forEach(post => {
-            const expiryDate = new Date(post.expiry);
-            const now = new Date();
-            const timeDiff = expiryDate - now;
-            let timeRemaining = '';
-            if (timeDiff > 0) {
-                const hours = Math.floor(timeDiff / (1000 * 60 * 60));
-                const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-                timeRemaining = `Expires in ${hours}h ${minutes}m`;
-            } else {
-                const hours = Math.floor(-timeDiff / (1000 * 60 * 60));
-                const minutes = Math.floor((-timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-                timeRemaining = `Expired ${hours}h ${minutes}m ago`;
-            }
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-                <h3>${post.foodName}</h3>
-                <p><strong>Quantity:</strong> ${post.quantity}</p>
-                <p><strong>Location:</strong> ${post.location}</p>
-                <p><strong>Time Remaining:</strong> ${timeRemaining}</p>
-                <p><strong>Phone:</strong> ${post.phone}</p>
-                <button class="btn collect-btn" data-id="${post.id}">Collect</button>
-            `;
-            foodList.appendChild(card);
-        });
-    }
+    const payload = {
+      foodName: form.foodName.value,
+      quantity: form.quantity.value,
+      location: locationInput.value,
+      lat: donorLat,
+      lng: donorLng,
+      expiry: form.expiry.value,
+      phone: form.phone.value
+    };
 
-    foodList.addEventListener('click', async (e) => {
-        if (e.target.classList.contains('collect-btn')) {
-            const id = e.target.dataset.id;
-            try {
-                const response = await fetch(`${API_BASE}/food/${id}`, {
-                    method: 'PUT'
-                });
-                if (response.ok) {
-                    fetchFoodPosts(); // Refresh the list
-                } else {
-                    alert('Error collecting food.');
-                }
-            } catch (error) {
-                console.error('Error collecting food:', error);
-                alert('Error collecting food.');
-            }
-        }
+    const res = await fetch(`${API_BASE}/food`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
     });
 
-    // Initial fetch
+    if (!res.ok) {
+      alert("Failed to post food");
+      return;
+    }
+
+    alertBox.style.display = "block";
+    alertBox.innerText = "✅ Food posted successfully!";
+    setTimeout(() => (alertBox.style.display = "none"), 3000);
+
+    form.reset();
+    getLocationBtn.innerText = "📍 Get Location";
+    donorLat = donorLng = null;
+  });
+}
+
+/* =========================
+   NGO PAGE
+========================= */
+if (location.pathname.includes("ngo.html")) {
+  const foodList = document.getElementById("foodList");
+  let ngoLat = null;
+  let ngoLng = null;
+
+  navigator.geolocation.getCurrentPosition(pos => {
+    ngoLat = pos.coords.latitude;
+    ngoLng = pos.coords.longitude;
+  });
+
+  async function fetchFoodPosts() {
+    const res = await fetch(`${API_BASE}/food`);
+    const posts = await res.json();
+    renderPosts(posts);
+  }
+
+  function renderPosts(posts) {
+    foodList.innerHTML = "";
+
+    if (!posts.length) {
+      foodList.innerHTML = "<p>No available food posts</p>";
+      return;
+    }
+
+    posts.forEach(post => {
+      if (!post.lat || !post.lng) return;
+
+      const expiry = new Date(post.expiry);
+      const diff = expiry - new Date();
+
+      const h = Math.max(Math.floor(diff / 3600000), 0);
+      const m = Math.max(Math.floor((diff % 3600000) / 60000), 0);
+
+      let ringColor = "#4caf50";
+      if (diff < 30 * 60000) ringColor = "#f44336";
+      else if (diff < 60 * 60000) ringColor = "#ff9800";
+
+      const distance =
+        ngoLat && ngoLng
+          ? `${calculateDistance(ngoLat, ngoLng, post.lat, post.lng)} km away`
+          : "Calculating…";
+
+      const card = document.createElement("div");
+      card.className = "card";
+
+      card.innerHTML = `
+        <h3>${post.foodName}</h3>
+        <p><b>Qty:</b> ${post.quantity}</p>
+        <p><b>Location:</b> ${post.location}</p>
+        <p><b>Phone:</b> ${post.phone}</p>
+
+        <div class="countdown-ring" style="--ring:${ringColor}">
+          ${h}h ${m}m
+        </div>
+
+        <p class="distance">📍 ${distance}</p>
+
+        <div class="map-container" id="map-${post.id}"></div>
+
+        <div class="card-actions">
+          <a class="map-link" target="_blank"
+            href="https://maps.google.com?q=${post.lat},${post.lng}">
+            📍 Open in Google Maps
+          </a>
+          <button class="collect-btn" data-id="${post.id}">Collect</button>
+        </div>
+      `;
+
+      foodList.appendChild(card);
+      setTimeout(() => initMap(`map-${post.id}`, post.lat, post.lng), 200);
+    });
+  }
+
+  function initMap(id, lat, lng) {
+    const map = L.map(id, { zoomControl: false }).setView([lat, lng], 15);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+    L.marker([lat, lng]).addTo(map);
+  }
+
+  foodList.addEventListener("click", async e => {
+    if (!e.target.classList.contains("collect-btn")) return;
+    await fetch(`${API_BASE}/food/${e.target.dataset.id}`, { method: "PUT" });
     fetchFoodPosts();
+  });
 
-    // Poll for updates every 10 seconds for real-time feel
-    setInterval(fetchFoodPosts, 10000);
+  fetchFoodPosts();
 }

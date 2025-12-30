@@ -7,25 +7,38 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <nav class="navbar">
-        <h1>🍽️ RePlate - Donor</h1>
-        <div class="nav-right">
-            <button id="darkModeToggle" class="toggle-btn">🌙</button>
-        </div>
-    </nav>
+   <nav class="navbar">
+  <div class="brand">
+    <div class="logo-wrap">
+      <img src="assets/logo.png" alt="RePlate Logo" />
+    </div>
+    <span class="brand-name">RePlate</span>
+  </div>
+
+  <button id="darkModeToggle" class="toggle-btn">🌙</button>
+</nav>
+
+
     <div class="container">
         <h2>Post Surplus Food</h2>
         <form id="foodForm" class="fade-in">
             <input type="text" id="foodName" placeholder="Food Name" required>
             <input type="text" id="quantity" placeholder="Quantity (e.g., 50 plates)" required>
             <div class="location-group">
-                <input type="text" id="location" placeholder="Pickup Location" required readonly>
-                <button type="button" id="getLocationBtn" class="btn location-btn">Get Current Location</button>
+                <input id="location" placeholder="Pickup Location" readonly>
+                <button type="button" id="getLocationBtn" class="btn">
+  📍 Get Location
+</button>
+
+
             </div>
             <input type="datetime-local" id="expiry" required>
             <input type="tel" id="phone" placeholder="Contact Phone" required>
             <button type="submit" class="btn">Submit Food</button>
+            <input type="hidden" id="lat">
+            <input type="hidden" id="lng">
         </form>
+
         <div id="alert" class="alert hidden"></div>
     </div>
     <script src="script.js"></script>
