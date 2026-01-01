@@ -1,47 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RePlate - NGO Dashboard</title>
-    <link rel="stylesheet" href="style.css">
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RePlate - NGO Dashboard</title>
 
-<script
-  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-  defer
-></script>
-<!-- Leaflet Routing -->
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"
-/>
+  <link rel="stylesheet" href="style.css" />
 
-<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
-
-
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    defer
+  ></script>
 </head>
+
 <body>
-   <nav class="navbar">
-  <div class="brand">
-    <div class="logo-wrap">
-      <img src="assets/logo.png" alt="RePlate Logo" />
+  <nav class="navbar">
+    <div class="brand">
+      <div class="logo-wrap">
+        <img src="assets/logo.png" alt="RePlate Logo" />
+      </div>
+      <span class="brand-name">RePlate</span>
     </div>
-    <span class="brand-name">RePlate</span>
+    <button id="darkModeToggle" class="toggle-btn">🌙</button>
+  </nav>
+
+  <div class="container">
+    <h2>Available Food Posts</h2>
+    <div id="foodList" class="food-list"></div>
   </div>
+  <div id="collectToast" class="collect-toast hidden">
+  <span class="check">✔</span>
+  <span id="toastText">Food collected</span>
+</div>
 
-  <button id="darkModeToggle" class="toggle-btn">🌙</button>
-</nav>
+<script src="script.js" defer></script>
 
-
-    </nav>
-    <div class="container">
-        <h2>Available Food Posts</h2>
-        <div id="foodList" class="food-list"></div>
-    </div>
-    <script src="script.js"></script>
 </body>
 </html>

@@ -15,7 +15,8 @@
     <span class="brand-name">RePlate</span>
   </div>
 
-  <button id="darkModeToggle" class="toggle-btn">🌙</button>
+  <button id="darkModeToggle">🌙</button>
+
 </nav>
 
 
@@ -34,7 +35,19 @@
             </div>
             <input type="datetime-local" id="expiry" required>
             <input type="tel" id="phone" placeholder="Contact Phone" required>
-            <button type="submit" class="btn">Submit Food</button>
+          <button id="submitFoodBtn" class="submit-btn">
+  <span class="btn-text">Submit Food</span>
+
+  <span class="btn-truck">
+    🚚
+  </span>
+
+  <span class="btn-success">
+    ✔ Food Posted
+  </span>
+</button>
+
+
             <input type="hidden" id="lat">
             <input type="hidden" id="lng">
         </form>

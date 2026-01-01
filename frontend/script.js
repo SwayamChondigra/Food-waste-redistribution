@@ -17,6 +17,18 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))).toFixed(2);
 }
 
+document.querySelectorAll(".role-card").forEach(card => {
+  card.addEventListener("click", () => {
+    document
+      .querySelectorAll(".role-card")
+      .forEach(c => c.classList.remove("selected"));
+
+    card.classList.add("selected");
+    card.querySelector("input").checked = true;
+  });
+});
+
+
 /* =========================
    DONOR PAGE
 ========================= */
@@ -25,77 +37,165 @@ if (location.pathname.includes("donor.html")) {
   const locationInput = document.getElementById("location");
   const getLocationBtn = document.getElementById("getLocationBtn");
   const alertBox = document.getElementById("alert");
+  const toggleBtn = document.getElementById("darkModeToggle");
+
+  /* 🌙 Dark mode */
+  if (localStorage.getItem("theme") === "dark") {
+    document.body.classList.add("dark");
+  }
+
+  toggleBtn.onclick = () => {
+    document.body.classList.toggle("dark");
+    localStorage.setItem(
+      "theme",
+      document.body.classList.contains("dark") ? "dark" : "light"
+    );
+  };
 
   let donorLat = null;
   let donorLng = null;
 
+  /* 📍 Get Location */
   getLocationBtn.addEventListener("click", () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation not supported");
+      return;
+    }
+
+    getLocationBtn.innerText = "⏳ Getting location...";
+
     navigator.geolocation.getCurrentPosition(
       async pos => {
         donorLat = pos.coords.latitude;
         donorLng = pos.coords.longitude;
 
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${donorLat}&lon=${donorLng}`
-        );
-        const data = await res.json();
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${donorLat}&lon=${donorLng}`
+          );
+          const data = await res.json();
 
-        locationInput.value =
-          data.display_name || `${donorLat}, ${donorLng}`;
+          locationInput.value =
+            data.display_name || `${donorLat}, ${donorLng}`;
+        } catch {
+          locationInput.value = `${donorLat}, ${donorLng}`;
+        }
 
         getLocationBtn.innerText = "✅ Location Set";
       },
       err => {
-        alert("Location permission denied");
+        alertBox.classList.remove("hidden");
+        alertBox.innerText = "❌ Location permission denied";
+        getLocationBtn.innerText = "📍 Get Location";
         console.error(err);
       }
     );
   });
 
+  /* 📤 Submit Food */
   form.addEventListener("submit", async e => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!donorLat || !donorLng) {
-      alert("Please click Get Location first");
-      return;
-    }
+  const btn = document.getElementById("submitFoodBtn");
 
-    const payload = {
-      foodName: form.foodName.value,
-      quantity: form.quantity.value,
-      location: locationInput.value,
-      lat: donorLat,
-      lng: donorLng,
-      expiry: form.expiry.value,
-      phone: form.phone.value
-    };
+  if (!donorLat || !donorLng) {
+    alertBox.classList.remove("hidden");
+    alertBox.innerText = "⚠️ Please click Get Location first";
+    return;
+  }
 
-    const res = await fetch(`${API_BASE}/food`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+  btn.classList.add("animate");
+  btn.disabled = true;
 
-    if (!res.ok) {
-      alert("Failed to post food");
-      return;
-    }
+  const payload = {
+    foodName: form.foodName.value,
+    quantity: form.quantity.value,
+    location: locationInput.value,
+    lat: donorLat,
+    lng: donorLng,
+    expiry: form.expiry.value,
+    phone: form.phone.value
+  };
 
-    alertBox.style.display = "block";
+  const res = await fetch(`${API_BASE}/food`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+
+  if (!res.ok) {
+    btn.classList.remove("animate");
+    btn.disabled = false;
+    alertBox.innerText = "❌ Failed to post food";
+    alertBox.classList.remove("hidden");
+    return;
+  }
+
+  setTimeout(() => {
+    btn.classList.remove("animate");
+    btn.classList.add("done");
+  }, 1400);
+
+  setTimeout(() => {
     alertBox.innerText = "✅ Food posted successfully!";
-    setTimeout(() => (alertBox.style.display = "none"), 3000);
+    alertBox.classList.remove("hidden");
 
     form.reset();
+    btn.classList.remove("done");
+    btn.disabled = false;
     getLocationBtn.innerText = "📍 Get Location";
     donorLat = donorLng = null;
-  });
-}
+  }, 2200);
+
+  setTimeout(() => {
+    alertBox.classList.add("hidden");
+  }, 4200);
+
+  submitBtn.classList.add("animate");
+submitBtn.disabled = true;
+
+// Truck finishes its journey (slow)
+setTimeout(() => {
+  submitBtn.classList.remove("animate");
+}, 2600);
+
+// Short pause → success appears
+setTimeout(() => {
+  submitBtn.classList.add("done");
+}, 3200);
+
+// Reset button (after user sees success)
+setTimeout(() => {
+  submitBtn.classList.remove("done");
+  submitBtn.disabled = false;
+}, 4500);
+
+
+});
+  
+} 
+
 
 /* =========================
    NGO PAGE
 ========================= */
 if (location.pathname.includes("ngo.html")) {
   const foodList = document.getElementById("foodList");
+  const toggleBtn = document.getElementById("darkModeToggle");
+
+  /* 🌙 Dark mode */
+  if (localStorage.getItem("theme") === "dark") {
+    document.body.classList.add("dark");
+  }
+
+  toggleBtn.onclick = () => {
+    document.body.classList.toggle("dark");
+    localStorage.setItem(
+      "theme",
+      document.body.classList.contains("dark") ? "dark" : "light"
+    );
+  };
+
   let ngoLat = null;
   let ngoLng = null;
 
@@ -105,10 +205,14 @@ if (location.pathname.includes("ngo.html")) {
   });
 
   async function fetchFoodPosts() {
-    const res = await fetch(`${API_BASE}/food`);
-    const posts = await res.json();
-    renderPosts(posts);
-  }
+  const res = await fetch(`${API_BASE}/food`);
+  const posts = await res.json();
+
+  console.log("NGO posts from API:", posts); // ✅ correct place
+
+  renderPosts(posts);
+}
+
 
   function renderPosts(posts) {
     foodList.innerHTML = "";
@@ -124,12 +228,15 @@ if (location.pathname.includes("ngo.html")) {
       const expiry = new Date(post.expiry);
       const diff = expiry - new Date();
 
-      const h = Math.max(Math.floor(diff / 3600000), 0);
-      const m = Math.max(Math.floor((diff % 3600000) / 60000), 0);
+      const total = 2 * 60 * 60 * 1000;
+      const percent = Math.max(Math.min(diff / total, 1), 0);
 
       let ringColor = "#4caf50";
       if (diff < 30 * 60000) ringColor = "#f44336";
       else if (diff < 60 * 60000) ringColor = "#ff9800";
+
+      const h = Math.max(Math.floor(diff / 3600000), 0);
+      const m = Math.max(Math.floor((diff % 3600000) / 60000), 0);
 
       const distance =
         ngoLat && ngoLng
@@ -139,13 +246,18 @@ if (location.pathname.includes("ngo.html")) {
       const card = document.createElement("div");
       card.className = "card";
 
+      let status = "Available";
+      if (diff < 30 * 60000) status = "Urgent";
+
       card.innerHTML = `
+        <span class="status">${status}</span>
         <h3>${post.foodName}</h3>
         <p><b>Qty:</b> ${post.quantity}</p>
         <p><b>Location:</b> ${post.location}</p>
         <p><b>Phone:</b> ${post.phone}</p>
 
-        <div class="countdown-ring" style="--ring:${ringColor}">
+        <div class="countdown-ring"
+          style="--ring:${ringColor}; --percent:${percent * 100}">
           ${h}h ${m}m
         </div>
 
@@ -163,21 +275,125 @@ if (location.pathname.includes("ngo.html")) {
       `;
 
       foodList.appendChild(card);
-      setTimeout(() => initMap(`map-${post.id}`, post.lat, post.lng), 200);
+      enableSwipe(card, post.id);
+      setTimeout(() => initMap(`map-${post.id}`, post.lat, post.lng), 100);
     });
   }
 
   function initMap(id, lat, lng) {
-    const map = L.map(id, { zoomControl: false }).setView([lat, lng], 15);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
-    L.marker([lat, lng]).addTo(map);
+  if (typeof L === "undefined") {
+    setTimeout(() => initMap(id, lat, lng), 100);
+    return;
   }
 
-  foodList.addEventListener("click", async e => {
-    if (!e.target.classList.contains("collect-btn")) return;
-    await fetch(`${API_BASE}/food/${e.target.dataset.id}`, { method: "PUT" });
+  const map = L.map(id, { zoomControl: false }).setView([lat, lng], 15);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+  L.marker([lat, lng]).addTo(map);
+}
+
+
+  let collectTimeout = null;
+  let pendingCollectId = null;
+
+foodList.addEventListener("click", e => {
+  if (!e.target.classList.contains("collect-btn")) return;
+
+  pendingCollectId = e.target.dataset.id;
+  showCollectToast();
+
+  collectTimeout = setTimeout(async () => {
+    e.target.closest(".card").style.opacity = "0.4";
+    e.target.closest(".card").style.pointerEvents = "none";
+
+    await fetch(`${API_BASE}/food/${pendingCollectId}`, {
+    method: "PUT"
+    });
+
+    setTimeout(fetchFoodPosts, 500);
+
     fetchFoodPosts();
+    hideCollectToast();
+  }, 5000);
+});
+
+
+function showCollectToast() {
+  const toast = document.getElementById("collectToast");
+  if (!toast) return;
+
+  toast.classList.remove("hidden");
+  toast.classList.add("show");
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.classList.add("hidden"), 300);
+  }, 2000);
+}
+fetchFoodPosts();
+
+// 🔄 Auto refresh food list every 10 seconds
+setInterval(fetchFoodPosts, 10000);
+
+}
+
+function enableSwipe(card, postId) {
+  let startX = 0;
+
+  card.addEventListener("touchstart", e => {
+    startX = e.touches[0].clientX;
   });
 
-  fetchFoodPosts();
+  card.addEventListener("touchend", e => {
+    const endX = e.changedTouches[0].clientX;
+    if (endX - startX > 80) {
+      pendingCollectId = postId;
+      showCollectToast();
+
+      collectTimeout = setTimeout(async () => {
+        await fetch(`${API_BASE}/food/${postId}`, { method: "PUT" });
+        fetchFoodPosts();
+      }, 5000);
+    }
+  });
 }
+
+/* =========================
+   LOGIN INTERACTIONS
+========================= */
+const roleForm = document.getElementById("roleForm");
+const proceedBtn = document.querySelector(".proceed-btn");
+const roleCards = document.querySelectorAll(".role-card");
+
+if (roleForm && proceedBtn) {
+  roleCards.forEach(card => {
+    card.addEventListener("click", () => {
+      roleCards.forEach(c => c.classList.remove("selected"));
+      card.classList.add("selected");
+      card.querySelector("input").checked = true;
+
+      proceedBtn.disabled = false; // ✅ enable button
+    });
+  });
+
+  roleForm.addEventListener("submit", e => {
+    e.preventDefault();
+
+    const selected = document.querySelector(
+      'input[name="role"]:checked'
+    );
+    if (!selected) return;
+
+    localStorage.setItem("role", selected.value);
+
+    // 🎬 fade-out before redirect
+    document.body.classList.add("fade-out");
+
+    setTimeout(() => {
+      window.location.href =
+        selected.value === "donor"
+          ? "donor.html"
+          : "ngo.html";
+    }, 450);
+  });
+}
+
