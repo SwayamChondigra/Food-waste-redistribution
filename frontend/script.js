@@ -32,6 +32,17 @@ document.querySelectorAll(".role-card").forEach(card => {
 /* =========================
    DONOR PAGE
 ========================= */
+/* =========================
+   DONOR PAGE GUARD
+========================= */
+if (location.pathname.includes("donor.html")) {
+  const role = localStorage.getItem("role");
+
+  if (role !== "donor") {
+    window.location.replace("login.html");
+  }
+}
+
 if (location.pathname.includes("donor.html")) {
   const form = document.getElementById("foodForm");
   const locationInput = document.getElementById("location");
@@ -151,26 +162,7 @@ if (location.pathname.includes("donor.html")) {
     alertBox.classList.add("hidden");
   }, 4200);
 
-  submitBtn.classList.add("animate");
-submitBtn.disabled = true;
-
-// Truck finishes its journey (slow)
-setTimeout(() => {
-  submitBtn.classList.remove("animate");
-}, 2600);
-
-// Short pause → success appears
-setTimeout(() => {
-  submitBtn.classList.add("done");
-}, 3200);
-
-// Reset button (after user sees success)
-setTimeout(() => {
-  submitBtn.classList.remove("done");
-  submitBtn.disabled = false;
-}, 4500);
-
-
+ 
 });
   
 } 
@@ -179,6 +171,17 @@ setTimeout(() => {
 /* =========================
    NGO PAGE
 ========================= */
+/* =========================
+   NGO PAGE GUARD
+========================= */
+if (location.pathname.includes("ngo.html")) {
+  const role = localStorage.getItem("role");
+
+  if (role !== "ngo") {
+    window.location.replace("login.html");
+  }
+}
+
 if (location.pathname.includes("ngo.html")) {
   const foodList = document.getElementById("foodList");
   const toggleBtn = document.getElementById("darkModeToggle");
@@ -383,17 +386,16 @@ if (roleForm && proceedBtn) {
     );
     if (!selected) return;
 
-    localStorage.setItem("role", selected.value);
+    // ✅ save role
+localStorage.setItem("role", selected.value);
 
-    // 🎬 fade-out before redirect
-    document.body.classList.add("fade-out");
+// 🎬 redirect
+window.location.href =
+  selected.value === "donor"
+    ? "donor.html"
+    : "ngo.html";
 
-    setTimeout(() => {
-      window.location.href =
-        selected.value === "donor"
-          ? "donor.html"
-          : "ngo.html";
     }, 450);
-  });
-}
+  };
+
 
