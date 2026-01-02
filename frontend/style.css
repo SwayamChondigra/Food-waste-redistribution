@@ -108,24 +108,25 @@ h1, h2 {
    GLASS CARD (FORMS + NGO)
 ========================= */
 .card {
-  max-width: 420px;
-  margin: auto;
-  background: rgba(255,255,255,0.9);
-  backdrop-filter: blur(14px);
-  border-radius: 18px;
-  padding: 18px;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+  position: relative;
 }
 
-/* Top accent bar */
 .card::before {
   content: "";
-  position: relative;
+  position: absolute;
   top: 0;
   left: 0;
   height: 5px;
   width: 100%;
   background: linear-gradient(90deg,#4caf50,#81c784);
+  border-radius: 18px 18px 0 0;
+}
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px 20px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 /* =========================
@@ -234,13 +235,17 @@ button {
   height: 54px;
   border-radius: 50%;
   background:
-    conic-gradient(var(--ring) calc(var(--percent) * 1%), #eee 0);
+    conic-gradient(
+      var(--ring) calc(var(--percent) * 100%),
+      #e5e7eb 0
+    );
   display: grid;
   place-items: center;
   font-size: 0.75rem;
   font-weight: 600;
   margin: 8px auto;
 }
+
 
 
 /* Optional: slightly smaller text for long durations */
@@ -437,10 +442,25 @@ body.dark .collect-toast {
   margin-bottom: 6px;
 }
 
-.status:contains("Urgent") {
+.status {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.status.available {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status.urgent {
   background: #ffebee;
   color: #c62828;
 }
+
 
 /* =========================
    LOGIN PAGE FIX
@@ -479,12 +499,6 @@ body.dark .login-card {
 
 /* =========================
    ROLE SELECTION LAYOUT
-========================= */
-/* =========================
-   ROLE SELECTION LAYOUT (LOGIN)
-========================= */
-/* =========================
-   ROLE SELECTION (FINAL)
 ========================= */
 .role-selection {
   display: grid;
@@ -613,4 +627,85 @@ body.fade-out {
     opacity: 0;
     transform: translateY(20px);
   }
+}
+
+body.dark .countdown-ring {
+  background:
+    conic-gradient(
+      var(--ring) calc(var(--percent) * 100%),
+      #1f2937 0
+    );
+}
+
+.food-list .card {
+  max-width: 520px;
+}
+
+/* ===== NGO CARD FIX ===== */
+.card {
+  max-width: 350px;
+  padding: 14px 16px;
+}
+
+/* Countdown ring center fix */
+.countdown-ring {
+  width: 64px;
+  height: 64px;
+  margin: 14px auto;
+  font-size: 0.85rem;
+  background:
+    conic-gradient(var(--ring) calc(var(--percent) * 1%), #e5e7eb 0);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+
+/* Distance text */
+.distance {
+  text-align: center;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+/* Google map spacing */
+.map-container iframe,
+.map-container {
+  height: 140px;                 /* was 160px */
+}
+
+/* Card actions alignment */
+.card-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+}
+
+/* Collect button better look */
+.collect-btn {
+  background: #22c55e;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-weight: 600;
+  border: none;
+}
+
+.collect-btn:hover {
+  background: #16a34a;
+}
+.collect-btn:active {
+  transform: scale(0.96);
+}
+
+.card p {
+  margin: 4px 0;
+  font-size: 0.95rem;
+}
+
+.card h3 {
+  margin: 6px 0;
+}
+.card .status {
+  margin-top: 6px;
 }

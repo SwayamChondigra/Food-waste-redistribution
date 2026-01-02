@@ -1,53 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RePlate - Donor Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RePlate - Donor</title>
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-   <nav class="navbar">
-  <div class="brand">
-    <div class="logo-wrap">
-      <img src="assets/logo.png" alt="RePlate Logo" />
+  <nav class="navbar">
+    <div class="brand">
+      <div class="logo-wrap">
+        <img src="assets/logo.png" />
+      </div>
+      <span class="brand-name">RePlate</span>
     </div>
-    <span class="brand-name">RePlate</span>
+    <p style="text-align:center; opacity:.85; margin-bottom:20px;">
+  <b>RePlate</b> is not just a platform — it’s a movement to respect food.
+</p>
+    <button id="darkModeToggle">🌙</button>
+  </nav>
+
+  <div class="container">
+    <h2>Post Surplus Food</h2>
+
+    <form id="foodForm">
+      <input id="foodName" placeholder="Food Name" required />
+      <input id="quantity" placeholder="Quantity (e.g., 50 plates)" required />
+
+      <div class="location-group">
+        <input id="location" placeholder="Pickup Location" readonly />
+        <button type="button" id="getLocationBtn" class="btn">📍 Get Location</button>
+      </div>
+
+      <input type="datetime-local" id="expiry" required />
+      <input id="phone" placeholder="Contact Phone" required />
+
+     <button type="submit" id="submitFoodBtn" class="btn">
+  Submit Food
+</button>
+
+    </form>
+
+    <div id="alert" class="alert hidden"></div>
   </div>
 
-  <button id="darkModeToggle">🌙</button>
-
-</nav>
-
-
-    <div class="container">
-        <h2>Post Surplus Food</h2>
-        <form id="foodForm" class="fade-in">
-            <input type="text" id="foodName" placeholder="Food Name" required>
-            <input type="text" id="quantity" placeholder="Quantity (e.g., 50 plates)" required>
-            <div class="location-group">
-                <input id="location" placeholder="Pickup Location" readonly>
-                <button type="button" id="getLocationBtn" class="btn">
-  📍 Get Location
-</button>
-
-
-            </div>
-            <input type="datetime-local" id="expiry" required>
-            <input type="tel" id="phone" placeholder="Contact Phone" required>
-          <button type="submit" class="btn submit-btn">
-  <span class="btn-text">Post Food</span>
-  <span class="spinner hidden"></span>
-</button>
-
-
-
-            <input type="hidden" id="lat">
-            <input type="hidden" id="lng">
-        </form>
-
-        <div id="alert" class="alert hidden"></div>
-    </div>
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
