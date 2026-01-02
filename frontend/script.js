@@ -107,15 +107,18 @@ if (location.pathname.includes("donor.html")) {
   form.addEventListener("submit", async e => {
   e.preventDefault();
 
-  const btn = document.getElementById("submitFoodBtn");
-
   if (!donorLat || !donorLng) {
-    alertBox.classList.remove("hidden");
-    alertBox.innerText = "⚠️ Please click Get Location first";
+    alert("Please click Get Location first");
     return;
   }
 
-  btn.classList.add("animate");
+  const btn = document.querySelector(".submit-btn");
+  const text = btn.querySelector(".btn-text");
+  const spinner = btn.querySelector(".spinner");
+
+  // Start animation
+  text.textContent = "Posting...";
+  spinner.classList.remove("hidden");
   btn.disabled = true;
 
   const payload = {
@@ -128,49 +131,38 @@ if (location.pathname.includes("donor.html")) {
     phone: form.phone.value
   };
 
-  const res = await fetch(`${API_BASE}/food`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
+  try {
+    const res = await fetch(`${API_BASE}/food`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
 
-  if (!res.ok) {
-    btn.classList.remove("animate");
-    btn.disabled = false;
-    alertBox.innerText = "❌ Failed to post food";
-    alertBox.classList.remove("hidden");
-    return;
-  }
+    if (!res.ok) throw new Error("Failed");
 
-  setTimeout(() => {
-    btn.classList.remove("animate");
-    btn.classList.add("done");
-  }, 1400);
-
-  setTimeout(() => {
-    alertBox.innerText = "✅ Food posted successfully!";
-    alertBox.classList.remove("hidden");
+    alertBox.textContent = "✅ Food posted successfully!";
+    alertBox.style.display = "block";
+    alertBox.classList.add("success-pop");
 
     form.reset();
-    btn.classList.remove("done");
-    btn.disabled = false;
-    getLocationBtn.innerText = "📍 Get Location";
     donorLat = donorLng = null;
-  }, 2200);
+  } catch {
+    alert("Failed to post food");
+  }
 
+  // Reset button
   setTimeout(() => {
-    alertBox.classList.add("hidden");
-  }, 4200);
-
- 
+    spinner.classList.add("hidden");
+    text.textContent = "Post Food";
+    btn.disabled = false;
+  }, 1000);
 });
+
   
 } 
 
 
-/* =========================
-   NGO PAGE
-========================= */
+
 /* =========================
    NGO PAGE GUARD
 ========================= */
@@ -298,25 +290,36 @@ if (location.pathname.includes("ngo.html")) {
   let collectTimeout = null;
   let pendingCollectId = null;
 
-foodList.addEventListener("click", e => {
-  if (!e.target.classList.contains("collect-btn")) return;
+foodList.addEventListener("click", async e => {
+  const btn = e.target.closest(".collect-btn");
+  if (!btn) return;
 
-  pendingCollectId = e.target.dataset.id;
-  showCollectToast();
+  const card = btn.closest(".card");
+  const id = btn.dataset.id;
 
-  collectTimeout = setTimeout(async () => {
-    e.target.closest(".card").style.opacity = "0.4";
-    e.target.closest(".card").style.pointerEvents = "none";
+  btn.classList.add("loading");
+  btn.textContent = "Collecting...";
+  btn.disabled = true;
 
-    await fetch(`${API_BASE}/food/${pendingCollectId}`, {
-    method: "PUT"
+  try {
+    const res = await fetch(`${API_BASE}/food/${id}`, {
+      method: "PUT"
     });
 
-    setTimeout(fetchFoodPosts, 500);
+    if (!res.ok) throw new Error();
 
-    fetchFoodPosts();
-    hideCollectToast();
-  }, 5000);
+    // Animate removal
+    card.classList.add("fade-out");
+
+    setTimeout(() => {
+      card.remove();
+    }, 400);
+  } catch {
+    alert("Failed to collect food");
+    btn.textContent = "Collect";
+    btn.disabled = false;
+    btn.classList.remove("loading");
+  }
 });
 
 
